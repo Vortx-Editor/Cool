@@ -1,0 +1,234 @@
+/* ضبط الخطوط والتنسيق العام */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #fcf9f5;
+    color: #4a3b32;
+    line-height: 1.6;
+}
+
+/* 1. تنسيق الهيرو (Hero Section) */
+.hero {
+    background-image: url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=1200');
+    background-size: cover;
+    background-position: center;
+    height: 80vh;
+    position: relative;
+}
+
+.hero-overlay {
+    background: rgba(0, 0, 0, 0.6);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #fff;
+    padding: 20px;
+}
+
+.hero-overlay h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.hero-overlay p {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+}
+
+.btn {
+    background-color: #c5a880;
+    color: #fff;
+    padding: 12px 30px;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background-color: #a4875e;
+}
+
+/* التنسيق المشترك للعناوين */
+section {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #5c4738;
+    position: relative;
+}
+
+section h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #c5a880;
+    margin: 10px auto 0;
+}
+
+/* 2. قسم عن الكافيه */
+.about {
+    background-color: #fff;
+    max-width: 800px;
+    margin: 40px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.about p {
+    font-size: 1.2rem;
+    color: #6e5d53;
+}
+
+/* 3. قسم المنيو (التجاوب السحري باستخدام الـ Grid) */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.menu-item {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: 0.3s;
+}
+
+.menu-item:hover {
+    transform: translateY(-5px);
+}
+
+.menu-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.menu-item h3 {
+    margin-bottom: 10px;
+    color: #5c4738;
+}
+
+.menu-item p {
+    font-size: 0.95rem;
+    color: #8c7669;
+    margin-bottom: 15px;
+}
+
+.price {
+    display: block;
+    font-weight: bold;
+    color: #c5a880;
+    font-size: 1.2rem;
+}
+
+/* 4. قسم آراء الكيافة */
+.testimonials {
+    background-color: #f5eedf;
+}
+
+.testimonials-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.review-card {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 280px;
+    max-width: 450px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    font-style: italic;
+}
+
+.review-card h4 {
+    margin-top: 15px;
+    color: #c5a880;
+    font-style: normal;
+}
+
+/* 5. قسم الموقع والدوام */
+.location {
+    background-color: #fff;
+}
+
+.location-info {
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+.map-placeholder {
+    background-color: #eee;
+    height: 250px;
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #888;
+    border: 2px dashed #ccc;
+}
+
+/* 6. الفوتر الأخير */
+.footer {
+    background-color: #3e3129;
+    color: #fff;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.social-links a {
+    color: #c5a880;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+/* 🔥 شاشات التابلت والجوال (Responsive Media Queries) */
+@media (max-width: 768px) {
+    .hero-overlay h1 {
+        font-size: 2.2rem;
+    }
+    .hero-overlay p {
+        font-size: 1.2rem;
+    }
+    section h2 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        height: 60vh;
+    }
+    .hero-overlay h1 {
+        font-size: 1.8rem;
+    }
+    section {
+        padding: 40px 15px;
+    }
+}

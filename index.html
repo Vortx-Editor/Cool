@@ -3,84 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أروما كافيه | تجربة القهوة المختصة</title>
+    <title>أروما كافيه | تجربة القهوة المختصة الفاخرة</title>
+    <!-- استدعاء الخط الفخم (Cairo) من قوقل طوالي -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <!-- مكتبة الأيقونات عشان النجوم الفخمة -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- 1. قسم الواجهة الرئيسية (Hero Section) -->
+    <!-- 1. قسم الواجهة الرئيسية الفخمة -->
     <header class="hero">
         <div class="hero-overlay">
-            <h1>أهلاً بكم في أروما كافيه</h1>
-            <p>حيث تلتقي عراقة المذاق بفخامة التجربة</p>
-            <a href="#menu" class="btn">تصفح المنيو</a>
+            <span class="brand-tag">أروما كافيه | AROMA</span>
+            <h1>حيث تلتقي عراقة المذاق<br><span class="highlight">بفخامة التجربة</span></h1>
+            <p>ننتقي محاصيلنا بعناية فائقة لتصل إلى كوبك محمصة ومعدة بحب وإتقان.</p>
+            <a href="#menu" class="btn">تصفح المنيو الفاخر</a>
         </div>
     </header>
 
-    <!-- 2. قسم سر النكهة / من نحن (About Section) -->
+    <!-- 2. قسم سر النكهة (خلفية بني دافئ) -->
     <section class="about">
-        <h2>سر النكهة في أروما</h2>
-        <p>في أروما، لا نصنع القهوة لمجرد ضبط المزاج، بل ننتقي محاصيلنا بعناية فائقة من سلالات البن المقطرة الفاخرة حول العالم، لتصل إلى كوبك محمصة ومعدة بحب وإتقان يواجه كيّافة القهوة الصدق.</p>
+        <div class="container">
+            <h2>سر النكهة في أروما</h2>
+            <p>في أروما، لا نصنع القهوة لمجرد ضبط المزاج، بل نعيش تفاصيلها. من اختيار حبات البن الفاخرة من المزارع المختصة، إلى التحميص الدقيق برائحة تأخذك لعالم آخر، لنوفر لكيّافة القهوة الصدق تجربة رقمية وحسية لا تُنسى.</p>
+        </div>
     </section>
 
-    <!-- 3. قسم المنيو وقائمة الطعام (Menu Section) -->
+    <!-- 3. قسم المنيو وقائمة الطعام (خلفية كريمي هادئة) -->
     <section id="menu" class="menu">
-        <h2>قائمتنا المختارة</h2>
-        <div class="menu-grid">
-            <div class="menu-item">
-                <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500" alt="قهوة مختصة">
-                <h3>سبانيش لاتيه بارد</h3>
-                <p>مزيج مثالي من الإسبريسو القوي والحليب المكثف المحلى.</p>
-                <span class="price">18 ر.س</span>
-            </div>
-            <div class="menu-item">
-                <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=500" alt="قهوة تقطير">
-                <h3>V60 كولومبي</h3>
-                <p>قهوة مقطرة سوداء بإيحاءات الفاكهة والشوكولاتة الفاخرة.</p>
-                <span class="price">22 ر.س</span>
-            </div>
-            <div class="menu-item">
-                <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=500" alt="كرواسون">
-                <h3>كرواسون باللوز</h3>
-                <p>مخبوزات فرنسية هشة ومقرمشة ومحشوة بكريمة اللوز الغنية.</p>
-                <span class="price">15 ر.س</span>
+        <div class="container">
+            <h2>قائمتنا المختارة</h2>
+            <p class="section-subtitle">اختر ما يضبط مزاجك الحين</p>
+            <div class="menu-grid">
+                <div class="menu-item">
+                    <div class="img-container">
+                        <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=600" alt="سبانيش لاتيه">
+                    </div>
+                    <h3>سبانيش لاتيه بارد</h3>
+                    <p>مزيج مثالي من الإسبريسو القوي والحليب المكثف المحلى مضافاً إليه قطع الثلج.</p>
+                    <span class="price">18 ر.س</span>
+                </div>
+                <div class="menu-item">
+                    <div class="img-container">
+                        <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600" alt="قهوة تقطير V60">
+                    </div>
+                    <h3>V60 كولومبي فاخر</h3>
+                    <p>قهوة مقطرة سوداء نقية مستخلصة من إيحاءات الفاكهة والشوكولاتة الفاخرة.</p>
+                    <span class="price">22 ر.س</span>
+                </div>
+                <div class="menu-item">
+                    <div class="img-container">
+                        <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=600" alt="كرواسون باللوز">
+                    </div>
+                    <h3>كرواسون فرنسي باللوز</h3>
+                    <p>مخبوزات فرنسية هشة ومقرمشة محشوة بكريمة اللوز ومزينة برقائق اللوز المقرمش.</p>
+                    <span class="price">15 ر.س</span>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- 4. قسم آراء الكيّافة / التقييمات (Testimonials Section) -->
+    <!-- 4. قسم آراء الكيّافة بالنجوم والصور (خلفية بني غامق ملكي) -->
     <section class="testimonials">
-        <h2>آراء الكيّافة</h2>
-        <div class="testimonials-grid">
-            <div class="review-card">
-                <p>"أفضل مكان للقهوة المختصة في المنطقة، الـ V60 عندهم يضبط الراس الصدق والخدمة سريعة!"</p>
-                <h4>- محمد عسيري</h4>
-            </div>
-            <div class="review-card">
-                <p>"المكان رايق وهادئ والكرواسون عندهم يذوب في الفم، صرت زبون دائم لهم."</p>
-                <h4>- سارة الفيفي</h4>
+        <div class="container">
+            <h2>آراء كِيّافة أروما</h2>
+            <div class="testimonials-grid">
+                <!-- كرت التقييم الأول -->
+                <div class="review-card">
+                    <div class="reviewer-header">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="محمد عسيري" class="avatar">
+                        <div class="reviewer-info">
+                            <h4>محمد عسيري</h4>
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="review-text">"أفضل مكان للقهوة المختصة في المنطقة بلا منازع، الـ V60 عندهم يضبط الراس الصدق والخدمة سريعة وتواجه!"</p>
+                </div>
+                <!-- كرت التقييم الثاني -->
+                <div class="review-card">
+                    <div class="reviewer-header">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="سارة الفيفي" class="avatar">
+                        <div class="reviewer-info">
+                            <h4>سارة الفيفي</h4>
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="review-text">"المكان رايق وهادئ جداً والكرواسون باللوز عندهم يذوب في الفم، صرت زبونة دائمة لهم وكل نهاية أسبوع لازم أثني عندهم."</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- 5. قسم أوقات الدوام والموقع (Location Section) -->
+    <!-- 5. قسم أوقات الدوام والموقع -->
     <section class="location">
-        <h2>ساعات العمل والموقع</h2>
-        <div class="location-info">
-            <p><strong>🕒 أوقات الدوام:</strong> يومياً من الساعة 6:00 صباحاً وحتى 12:00 منتصف الليل.</p>
-            <p><strong>📍 الموقع:</strong> طريق الملك خالد، خميس مشيط، منطقة عسير.</p>
-        </div>
-        <!-- خريطة وهمية فخمة تملأ العين -->
-        <div class="map-placeholder">
-            <p>📍 خريطة تفاعلية فرعية لموقع الكافيه</p>
+        <div class="container">
+            <h2>ساعات العمل والموقع</h2>
+            <div class="location-box">
+                <div class="info-item">
+                    <i class="fas fa-clock icon"></i>
+                    <p><strong>أوقات الدوام:</strong> يومياً من الساعة 6:00 صباحاً وحتى 12:00 منتصف الليل.</p>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-map-marker-alt icon"></i>
+                    <p><strong>الموقع:</strong> طريق الملك خالد، خميس مشيط، منطقة عسير.</p>
+                </div>
+            </div>
+            <!-- تصميم فخم للخريطة فرعي وملون -->
+            <div class="map-box">
+                <i class="fas fa-map-marked-alt"></i>
+                <p>خريطة تفاعلية فرعية لموقع الكافيه (Google Maps Placeholder)</p>
+            </div>
         </div>
     </section>
 
-    <!-- 6. قسم الفوتر الأخير (Footer) -->
+    <!-- 6. قسم الفوتر الفخم -->
     <footer class="footer">
-        <p>جميع الحقوق محفوظة © أروما كافيه 2026</p>
+        <p>جميع الحقوق محفوظة © أروما كافيه 2026 | تطوير وحش الويب VORTX</p>
         <div class="social-links">
-            <a href="#">تويتر</a> | <a href="#">إنستغرام</a> | <a href="#">تيك توك</a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-tiktok"></i></a>
         </div>
     </footer>
 

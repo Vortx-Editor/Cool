@@ -73,10 +73,10 @@ body {
     color: #e0d5ce;
 }
 
-/* 🔥 تكتيك الزجاج الآيفوني للأزرار (Glassmorphism) */
+/* زر زجاجي بنظام الآيفون */
 .btn {
-    background: rgba(255, 255, 255, 0.08); /* شفافية خفيفة */
-    backdrop-filter: blur(15px); /* تأثير الضباب والتمويه حق الـ iOS */
+    background: rgba(255, 255, 255, 0.08); 
+    backdrop-filter: blur(15px); 
     -webkit-backdrop-filter: blur(15px);
     color: var(--pure-white);
     padding: 14px 40px;
@@ -84,7 +84,7 @@ body {
     border-radius: 30px;
     font-weight: 700;
     font-size: 1.1rem;
-    border: 1px solid rgba(255, 255, 255, 0.25); /* برواز زجاجي نحيف */
+    border: 1px solid rgba(255, 255, 255, 0.25); 
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     display: inline-block;
@@ -143,19 +143,20 @@ section h2::after {
     gap: 40px;
 }
 
+/* 🔥 تم نسف اللون الأبيض من الكروت وتحويلها لبني كوفي فخم متناسق */
 .menu-item {
-    background-color: var(--pure-white);
+    background-color: var(--deep-espresso); /* بني إسبريسو غامق ملكي */
     border-radius: 15px;
     overflow: hidden;
     padding: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    border: 1px solid #f0e6df;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border: 1px solid rgba(197, 155, 109, 0.15); /* إطار ذهبي نحيف وخافت */
     transition: all 0.3s ease;
 }
 
 .menu-item:hover {
     transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(78, 54, 41, 0.15);
+    box-shadow: 0 15px 40px rgba(197, 155, 109, 0.2);
 }
 
 .img-container {
@@ -173,12 +174,32 @@ section h2::after {
 }
 
 .menu-item:hover img { transform: scale(1.1); }
-.menu-item h3 { color: var(--deep-espresso); font-size: 1.4rem; margin-bottom: 10px; }
-.menu-item p { color: #66554c; font-size: 0.95rem; margin-bottom: 20px; height: 50px; }
-.price { display: block; font-size: 1.3rem; font-weight: 700; color: var(--luxury-gold); border-top: 1px solid #f5ede8; padding-top: 15px; }
+
+/* نصوص الكروت عدلناها لكريمي لاتيه عشان توضح فوق البني */
+.menu-item h3 { 
+    color: var(--luxury-gold); 
+    font-size: 1.4rem; 
+    margin-bottom: 10px; 
+}
+
+.menu-item p { 
+    color: #ded1c7; 
+    font-size: 0.95rem; 
+    margin-bottom: 20px; 
+    height: 50px; 
+}
+
+.price { 
+    display: block; 
+    font-size: 1.3rem; 
+    font-weight: 700; 
+    color: var(--luxury-gold); 
+    border-top: 1px solid rgba(255, 255, 255, 0.08); 
+    padding-top: 15px; 
+}
 
 .testimonials {
-    background-color: var(--deep-espresso);
+    background-color: var(--warm-coffee);
     color: var(--pure-white);
 }
 
@@ -203,18 +224,17 @@ section h2::after {
     margin-bottom: 20px;
 }
 
-/* 🛠️ هندسة رمز الواتس المجهول بدون وجه وخلفية مقندة */
 .avatar-wa {
     width: 65px;
     height: 65px;
     border-radius: 50%;
-    background-color: #cbd5e1; /* رمادي الواتس المشهور */
-    color: #e2e8f0; /* لون خيال الجسم الداخلي */
+    background-color: #cbd5e1; 
+    color: #e2e8f0; 
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* لجل يقعد الشبح متوازن تحت */
+    align-items: flex-end; 
     font-size: 2.5rem;
-    border: 2px solid var(--luxury-gold); /* لمسة ذهبية تليق بأروما */
+    border: 2px solid var(--luxury-gold); 
     overflow: hidden;
     padding-bottom: 2px;
 }
@@ -249,9 +269,18 @@ section h2::after {
     align-items: center;
     color: var(--warm-coffee);
     border: 2px dashed var(--luxury-gold);
+    padding: 0 20px; /* لحماية النص من الأطراف */
 }
 
 .map-box i { font-size: 3rem; margin-bottom: 15px; color: var(--luxury-gold); }
+
+/* 🔥 تثبيت كلام الخريطة في السنتر مية بالمية حتى لو نزل سطر جديد */
+.map-text {
+    text-align: center !important;
+    width: 100%;
+    font-weight: 500;
+    color: var(--warm-coffee);
+}
 
 .footer {
     background-color: #140a06;
